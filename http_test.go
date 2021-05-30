@@ -33,7 +33,44 @@ func TestClient_ko(t *testing.T) {
 	}, 100)
 }
 
+func TestClient_redis_ok(t *testing.T) {
+	cfg := &config.Backend{
+		Decoder: encoding.JSONDecoder,
+		ExtraConfig: map[string]interface{}{
+			Namespace: map[string]interface{}{
+				"storage":        "redis",
+				"redis_hostname": "localhost:6379",
+				"redis_db":       0,
+				"redis_username": "",
+				"redis_password": "",
+			},
+		},
+	}
+	testCacheSystem(t, func(t *testing.T, URL string) {
+		testClient(t, cfg, URL)
+	}, 1)
+}
+
+func TestClient_redis_ko(t *testing.T) {
+	cfg := &config.Backend{
+		Decoder: encoding.JSONDecoder,
+		ExtraConfig: map[string]interface{}{
+			Namespace: map[string]interface{}{
+				"storage":        "redis",
+				"redis_hostname": 0,
+				"redis_db":       "string",
+				"redis_username": 0,
+				"redis_password": 0,
+			},
+		},
+	}
+	testCacheSystem(t, func(t *testing.T, URL string) {
+		testClient(t, cfg, URL)
+	}, 1)
+}
+
 func testClient(t *testing.T, cfg *config.Backend, URL string) {
+	fmt.Println(cfg)
 	clientFactory := NewHTTPClient(cfg)
 	client := clientFactory(context.Background())
 
